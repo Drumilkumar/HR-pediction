@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vastu AI — Intelligent Property Valuation</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream: #faf7f2;
+  --warm: #f5ede0;
+  --paper: #efe8da;
+  --ink: #1c1812;
+  --ink2: #3d3528;
+  --muted: #8a7d6b;
+  --accent: #c8622a;
+  --accent2: #2a6bc8;
+  --gold: #b8962a;
+  --success: #2a8a4a;
+  --danger: #c82a2a;
+  --warn: #b8762a;
+  --border: rgba(28,24,18,0.1);
+  --radius: 18px;
+  --shadow: 0 4px 32px rgba(28,24,18,0.08);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--cream);
+  color:var(--ink);
+  font-family:'Outfit',sans-serif;
+  font-weight:300;
+  overflow-x:hidden;
+}
+
+/* ── CURSOR ── */
+*, *::before, *::after { cursor: default; }
+a, button, .chip, .amenity, select, input { cursor: pointer; }
+
+/* ── HEADER ── */
+header{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  background:rgba(250,247,242,0.92);
+  backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--border);
+  padding:0 3rem;
+  display:flex;align-items:center;justify-content:space-between;
+  height:64px;
+}
+.logo{
+  font-family:'Playfair Display',serif;
+  font-size:1.4rem;font-weight:900;letter-spacing:-0.5px;
+  color:var(--ink);
+}
+.logo sup{
+  font-size:0.5rem;vertical-align:super;
+  background:var(--accent);color:#fff;
+  padding:1px 5px;border-radius:4px;
+  font-family:'Outfit',sans-serif;font-weight:600;letter-spacing:1px;
+  text-transform:uppercase;
+}
+nav{display:flex;gap:2.5rem;align-items:center;}
+nav a{
+  color:var(--muted);text-decoration:none;font-size:14px;font-weight:400;
+  transition:color 0.2s;
+}
+nav a:hover{color:var(--ink);}
+.nav-cta{
+  background:var(--accent);color:#fff;
+  padding:8px 20px;border-radius:100px;
+  font-size:13px;font-weight:500;
+  transition:all 0.2s;border:none;
+}
+.nav-cta:hover{background:#b8551f;transform:translateY(-1px);}
+
+/* ── HERO ── */
+.hero{
+  min-height:100vh;
+  display:grid;grid-template-columns:1fr 1fr;
+  align-items:center;gap:4rem;
+  padding:100px 5rem 4rem;
+  position:relative;overflow:hidden;
+}
+.hero-texture{
+  position:absolute;inset:0;pointer-events:none;
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(28,24,18,0.04) 1px, transparent 0);
+  background-size:32px 32px;
+}
+.hero-glow{
+  position:absolute;top:-20%;right:-10%;width:600px;height:600px;
+  border-radius:50%;
+  background:radial-gradient(circle, rgba(200,98,42,0.08) 0%, transparent 70%);
+  pointer-events:none;
+}
+.hero-left{position:relative;}
+.hero-tag{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(200,98,42,0.08);border:1px solid rgba(200,98,42,0.2);
+  color:var(--accent);font-size:12px;font-weight:500;
+  padding:6px 14px;border-radius:100px;letter-spacing:0.5px;
+  margin-bottom:1.8rem;
+  animation:riseIn 0.7s ease both;
+}
+.hero-tag::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--accent);}
+.hero h1{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(2.8rem,4.5vw,4.2rem);
+  font-weight:900;line-height:1.08;letter-spacing:-2px;
+  animation:riseIn 0.7s 0.1s ease both;
+}
+.hero h1 em{font-style:italic;color:var(--accent);}
+.hero-sub{
+  color:var(--muted);font-size:1rem;line-height:1.7;
+  margin-top:1.5rem;max-width:480px;font-weight:300;
+  animation:riseIn 0.7s 0.2s ease both;
+}
+.hero-actions{
+  display:flex;gap:1rem;margin-top:2.5rem;flex-wrap:wrap;
+  animation:riseIn 0.7s 0.3s ease both;
+}
+.btn-main{
+  background:var(--accent);color:#fff;
+  border:none;padding:14px 30px;border-radius:100px;
+  font-family:'Outfit',sans-serif;font-weight:500;font-size:15px;
+  transition:all 0.2s;
+}
+.btn-main:hover{background:#b8551f;transform:translateY(-2px);box-shadow:0 8px 24px rgba(200,98,42,0.3);}
+.btn-ghost{
+  background:transparent;color:var(--ink2);
+  border:1px solid var(--border);padding:14px 30px;border-radius:100px;
+  font-family:'Outfit',sans-serif;font-weight:400;font-size:15px;
+  transition:all 0.2s;
+}
+.btn-ghost:hover{border-color:rgba(28,24,18,0.25);background:rgba(28,24,18,0.03);}
+.hero-stats{
+  display:flex;gap:2.5rem;margin-top:3.5rem;padding-top:2rem;
+  border-top:1px solid var(--border);
+  animation:riseIn 0.7s 0.4s ease both;
+}
+.hstat-num{
+  font-family:'Playfair Display',serif;
+  font-size:1.8rem;font-weight:700;color:var(--accent);
+}
+.hstat-label{font-size:12px;color:var(--muted);margin-top:2px;}
+
+/* HERO RIGHT - floating card */
+.hero-right{position:relative;animation:riseIn 0.7s 0.2s ease both;}
+.hero-card{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:2rem;
+  box-shadow:var(--shadow);
+  position:relative;
+}
+.hero-card::before{
+  content:'Est. Value';
+  position:absolute;top:-12px;left:24px;
+  background:var(--accent);color:#fff;
+  font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;
+  padding:4px 12px;border-radius:100px;
+}
+.sample-price{
+  font-family:'Playfair Display',serif;
+  font-size:2.4rem;font-weight:700;
+  color:var(--ink);margin:1rem 0 0.4rem;
+}
+.sample-range{font-size:13px;color:var(--muted);}
+.sample-tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:1.2rem;}
+.stag{
+  background:var(--warm);border:1px solid var(--border);
+  color:var(--ink2);font-size:12px;font-weight:400;
+  padding:4px 10px;border-radius:6px;
+}
+.sample-bars{margin-top:1.5rem;}
+.sbar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.sbar-l{width:72px;font-size:11px;color:var(--muted);text-align:right;flex-shrink:0;}
+.sbar-t{flex:1;height:4px;background:var(--warm);border-radius:2px;overflow:hidden;}
+.sbar-f{height:100%;border-radius:2px;background:var(--accent);animation:growBar 1.5s ease both;}
+.sbar-v{width:28px;font-size:11px;color:var(--ink2);font-weight:500;}
+@keyframes growBar{from{width:0!important}to{}}
+.verdict-pill{
+  margin-top:1.2rem;
+  background:rgba(42,138,74,0.08);border:1px solid rgba(42,138,74,0.2);
+  border-radius:var(--radius);padding:10px 14px;
+  font-size:13px;color:var(--success);
+  display:flex;align-items:center;gap:8px;
+}
+.verdict-pill::before{content:'✓';font-weight:700;}
+
+/* ── MAIN ── */
+main{max-width:1200px;margin:0 auto;padding:4rem 2.5rem;}
+section{margin-bottom:6rem;}
+.sec-eyebrow{
+  font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;
+  color:var(--accent);margin-bottom:0.6rem;
+}
+.sec-title{
+  font-family:'Playfair Display',serif;
+  font-size:2rem;font-weight:700;letter-spacing:-0.5px;
+  margin-bottom:0.4rem;
+}
+.sec-sub{color:var(--muted);font-size:14px;margin-bottom:2.5rem;}
+
+/* ── PREDICTOR ── */
+.pred-grid{display:grid;grid-template-columns:1fr 1fr;gap:2.5rem;}
+@media(max-width:900px){.pred-grid{grid-template-columns:1fr;}}
+
+.form-panel{
+  background:#fff;border:1px solid var(--border);
+  border-radius:var(--radius);padding:2rem;
+  box-shadow:var(--shadow);
+}
+.panel-head{
+  font-family:'Playfair Display',serif;
+  font-size:1.1rem;font-weight:700;
+  margin-bottom:1.5rem;padding-bottom:1rem;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;
+}
+.panel-icon{
+  width:32px;height:32px;border-radius:8px;
+  background:rgba(200,98,42,0.1);
+  display:flex;align-items:center;justify-content:center;font-size:16px;
+}
+.fg{display:flex;flex-direction:column;gap:6px;margin-bottom:1rem;}
+.fg label{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:0.5px;text-transform:uppercase;}
+.fg input,.fg select{
+  background:var(--warm);border:1px solid var(--border);
+  color:var(--ink);padding:10px 14px;
+  border-radius:10px;font-family:'Outfit',sans-serif;
+  font-size:14px;font-weight:300;transition:border-color 0.2s;
+  width:100%;
+}
+.fg input:focus,.fg select:focus{outline:none;border-color:rgba(200,98,42,0.4);background:#fff;}
+.fg select option{background:#fff;}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+@media(max-width:500px){.fgrid{grid-template-columns:1fr;}}
+.fg.full{grid-column:1/-1;}
+
+/* AMENITIES */
+.amen-label{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:8px;}
+.amen-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;}
+.amenity{
+  display:flex;align-items:center;gap:7px;
+  background:var(--warm);border:1px solid var(--border);
+  border-radius:9px;padding:7px 10px;
+  font-size:12px;font-weight:400;color:var(--ink2);
+  transition:all 0.18s;user-select:none;
+}
+.amenity:hover{border-color:rgba(200,98,42,0.3);}
+.amenity.on{
+  background:rgba(200,98,42,0.08);
+  border-color:rgba(200,98,42,0.4);
+  color:var(--accent);font-weight:500;
+}
+.amenity .ai{font-size:14px;}
+
+.asking-row{
+  display:flex;align-items:center;gap:10px;
+  background:var(--warm);border:1px solid var(--border);
+  border-radius:10px;padding:10px 14px;
+  margin-top:1rem;
+}
+.asking-row input{
+  flex:1;background:transparent;border:none;
+  color:var(--ink);font-family:'Outfit',sans-serif;font-size:14px;
+  padding:0;
+}
+.asking-row input:focus{outline:none;}
+.asking-row span{font-size:14px;color:var(--muted);font-weight:500;}
+
+.predict-btn{
+  width:100%;margin-top:1.5rem;
+  background:var(--accent);color:#fff;border:none;
+  padding:14px;border-radius:10px;
+  font-family:'Playfair Display',serif;
+  font-weight:700;font-size:16px;
+  transition:all 0.2s;letter-spacing:0.3px;
+}
+.predict-btn:hover{background:#b8551f;transform:translateY(-1px);box-shadow:0 6px 20px rgba(200,98,42,0.25);}
+.predict-btn:active{transform:scale(0.99);}
+
+/* RESULT PANEL */
+.result-panel{
+  background:#fff;border:1px solid var(--border);
+  border-radius:var(--radius);padding:2rem;
+  box-shadow:var(--shadow);
+  display:flex;flex-direction:column;gap:1.5rem;
+}
+.placeholder{
+  flex:1;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  text-align:center;padding:3rem 1rem;gap:1rem;
+  color:var(--muted);
+}
+.ph-icon{
+  width:72px;height:72px;border-radius:50%;
+  background:var(--warm);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;font-size:2rem;
+}
+.ph-title{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--ink);}
+.ph-sub{font-size:13px;}
+
+.price-block{
+  background:linear-gradient(135deg,var(--warm) 0%,rgba(200,98,42,0.06) 100%);
+  border:1px solid rgba(200,98,42,0.15);
+  border-radius:14px;padding:1.5rem;text-align:center;
+}
+.pb-label{font-size:11px;font-weight:600;color:var(--accent);letter-spacing:1px;text-transform:uppercase;}
+.pb-price{
+  font-family:'Playfair Display',serif;
+  font-size:2.6rem;font-weight:700;color:var(--ink);
+  margin:6px 0 4px;letter-spacing:-1px;
+}
+.pb-range{font-size:13px;color:var(--muted);}
+
+.verdict-card{border-radius:12px;padding:1rem 1.2rem;font-size:13px;line-height:1.6;}
+.verdict-card.good{background:rgba(42,138,74,0.06);border:1px solid rgba(42,138,74,0.2);}
+.verdict-card.fair{background:rgba(184,118,42,0.06);border:1px solid rgba(184,118,42,0.2);}
+.verdict-card.high{background:rgba(200,42,42,0.06);border:1px solid rgba(200,42,42,0.2);}
+.vc-title{font-weight:600;font-size:14px;margin-bottom:4px;}
+.verdict-card.good .vc-title{color:var(--success);}
+.verdict-card.fair .vc-title{color:var(--warn);}
+.verdict-card.high .vc-title{color:var(--danger);}
+.verdict-card p{color:var(--muted);}
+
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.metric{
+  background:var(--warm);border:1px solid var(--border);
+  border-radius:10px;padding:12px;text-align:center;
+}
+.mv{font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;color:var(--accent);}
+.mk{font-size:11px;color:var(--muted);margin-top:2px;}
+
+.factors-section{}
+.fs-title{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:10px;}
+.fbar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.fbar-l{width:78px;font-size:12px;color:var(--muted);text-align:right;flex-shrink:0;}
+.fbar-t{flex:1;height:5px;background:var(--warm);border-radius:3px;overflow:hidden;}
+.fbar-f{height:100%;border-radius:3px;background:var(--accent);transition:width 0.8s cubic-bezier(.4,0,.2,1);}
+.fbar-v{width:32px;font-size:12px;color:var(--ink2);font-weight:500;}
+
+.sug-section{}
+.sug-title{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:10px;}
+.sug-list{list-style:none;display:flex;flex-direction:column;gap:7px;}
+.sug-list li{
+  display:flex;gap:10px;align-items:flex-start;
+  font-size:13px;color:var(--ink2);line-height:1.5;font-weight:300;
+}
+.sug-list li::before{content:'→';color:var(--accent);font-weight:700;flex-shrink:0;margin-top:1px;}
+
+/* ── MARKET DATA ── */
+.market-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem;}
+@media(max-width:800px){.market-grid{grid-template-columns:repeat(2,1fr);}}
+.mcard{
+  background:#fff;border:1px solid var(--border);
+  border-radius:14px;padding:1.2rem;
+  box-shadow:var(--shadow);
+  transition:transform 0.2s,box-shadow 0.2s;
+}
+.mcard:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(28,24,18,0.1);}
+.mc-city{font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;margin-bottom:4px;}
+.mc-psf{font-size:1.3rem;font-weight:600;color:var(--accent);font-family:'Playfair Display',serif;}
+.mc-label{font-size:11px;color:var(--muted);}
+.mc-trend{
+  margin-top:8px;font-size:11px;font-weight:500;
+  display:inline-flex;align-items:center;gap:4px;
+  padding:2px 8px;border-radius:100px;
+}
+.mc-trend.up{background:rgba(42,138,74,0.08);color:var(--success);}
+.mc-trend.stable{background:rgba(184,118,42,0.08);color:var(--warn);}
+
+/* ── CHAT ── */
+.chat-outer{
+  background:#fff;border:1px solid var(--border);
+  border-radius:var(--radius);overflow:hidden;
+  box-shadow:var(--shadow);height:580px;
+  display:flex;flex-direction:column;
+}
+.chat-hd{
+  padding:1rem 1.5rem;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--warm);
+}
+.chat-hd-left{display:flex;align-items:center;gap:12px;}
+.agent-av{
+  width:40px;height:40px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),var(--gold));
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;box-shadow:0 2px 8px rgba(200,98,42,0.3);
+}
+.agent-name{font-family:'Playfair Display',serif;font-weight:700;font-size:15px;}
+.agent-status{font-size:12px;color:var(--success);display:flex;align-items:center;gap:5px;margin-top:1px;}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--success);display:inline-block;}
+.chat-msgs{
+  flex:1;overflow-y:auto;padding:1.2rem;
+  display:flex;flex-direction:column;gap:12px;
+  scrollbar-width:thin;scrollbar-color:var(--border) transparent;
+}
+.cmsg{display:flex;gap:10px;align-items:flex-end;max-width:88%;}
+.cmsg.user{align-self:flex-end;flex-direction:row-reverse;}
+.cmsg-av{
+  width:30px;height:30px;border-radius:50%;flex-shrink:0;
+  background:var(--warm);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;font-size:14px;
+}
+.cmsg.user .cmsg-av{background:rgba(200,98,42,0.1);border-color:rgba(200,98,42,0.2);}
+.cmsg-b{
+  padding:10px 14px;border-radius:14px;
+  font-size:13.5px;line-height:1.65;font-weight:300;
+}
+.cmsg.bot .cmsg-b{
+  background:var(--warm);border:1px solid var(--border);
+  border-bottom-left-radius:4px;color:var(--ink);
+}
+.cmsg.user .cmsg-b{
+  background:rgba(200,98,42,0.1);border:1px solid rgba(200,98,42,0.2);
+  border-bottom-right-radius:4px;color:var(--ink);
+}
+.typing-b{display:flex;gap:4px;padding:12px 14px;align-items:center;}
+.typing-b span{
+  width:6px;height:6px;background:var(--muted);border-radius:50%;
+  animation:tbounce 1.2s infinite;
+}
+.typing-b span:nth-child(2){animation-delay:0.2s;}
+.typing-b span:nth-child(3){animation-delay:0.4s;}
+@keyframes tbounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
+
+.quick-area{
+  padding:0.6rem 1.2rem 0.4rem;
+  display:flex;gap:7px;flex-wrap:wrap;
+  border-top:1px solid var(--border);background:var(--cream);
+}
+.qchip{
+  background:var(--warm);border:1px solid var(--border);
+  border-radius:100px;padding:5px 12px;
+  font-size:12px;color:var(--ink2);font-weight:300;
+  transition:all 0.18s;
+}
+.qchip:hover{border-color:rgba(200,98,42,0.35);color:var(--accent);}
+.chat-input-row{
+  padding:0.9rem 1.2rem;border-top:1px solid var(--border);
+  display:flex;gap:10px;align-items:center;
+  background:var(--cream);
+}
+.cinput{
+  flex:1;background:var(--warm);border:1px solid var(--border);
+  color:var(--ink);padding:10px 16px;border-radius:100px;
+  font-family:'Outfit',sans-serif;font-size:14px;font-weight:300;
+  transition:border-color 0.2s;
+}
+.cinput:focus{outline:none;border-color:rgba(200,98,42,0.4);background:#fff;}
+.csend{
+  width:40px;height:40px;border-radius:50%;
+  background:var(--accent);border:none;
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;transition:all 0.2s;flex-shrink:0;color:#fff;
+  font-weight:700;
+}
+.csend:hover{background:#b8551f;transform:scale(1.05);}
+
+/* ── FOOTER ── */
+footer{
+  background:var(--ink);color:var(--warm);
+  padding:3rem 5rem;
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:1rem;
+}
+.footer-logo{font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:900;}
+.footer-note{font-size:12px;color:var(--muted);max-width:400px;line-height:1.6;}
+.footer-links{display:flex;gap:1.5rem;}
+.footer-links a{color:var(--muted);text-decoration:none;font-size:13px;transition:color 0.2s;}
+.footer-links a:hover{color:var(--warm);}
+
+/* ── ANIMATIONS ── */
+@keyframes riseIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.fadein{animation:riseIn 0.5s ease both;}
+.loading{opacity:0.5;pointer-events:none;}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+
+@media(max-width:768px){
+  .hero{grid-template-columns:1fr;padding:90px 2rem 3rem;}
+  .hero-right{display:none;}
+  .hero-stats{gap:1.5rem;}
+  header{padding:0 1.5rem;}
+  footer{padding:2rem;}
+  main{padding:3rem 1.5rem;}
+}
+
+/* config banner */
+.config-banner{
+  background:rgba(200,98,42,0.08);border:1px solid rgba(200,98,42,0.2);
+  border-radius:10px;padding:10px 16px;margin-bottom:1rem;
+  font-size:13px;color:var(--accent);display:flex;align-items:center;gap:8px;
+}
+.config-banner input{
+  flex:1;background:transparent;border:none;
+  border-bottom:1px dashed rgba(200,98,42,0.4);
+  color:var(--ink);font-family:'Outfit',sans-serif;font-size:13px;
+  padding:2px 4px;outline:none;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Vastu<sup>AI</sup></div>
+  <nav>
+    <a href="#predictor">Predict</a>
+    <a href="#market">Market</a>
+    <a href="#assistant">Assistant</a>
+    <button class="nav-cta" onclick="document.getElementById('predictor').scrollIntoView({behavior:'smooth'})">Get Valuation</button>
+  </nav>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-texture"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-left">
+    <div class="hero-tag">AI-Powered · India Real Estate · 2026</div>
+    <h1>The <em>intelligent</em><br>way to value<br>your home</h1>
+    <p class="hero-sub">Know exactly what any flat or house is worth before you buy, sell, or negotiate. Powered by real market data across 12 Indian cities.</p>
+    <div class="hero-actions">
+      <button class="btn-main" onclick="document.getElementById('predictor').scrollIntoView({behavior:'smooth'})">Predict Price Now</button>
+      <button class="btn-ghost" onclick="document.getElementById('assistant').scrollIntoView({behavior:'smooth'})">Ask AI Assistant</button>
+    </div>
+    <div class="hero-stats">
+      <div><div class="hstat-num">₹2Cr+</div><div class="hstat-label">Properties Valued</div></div>
+      <div><div class="hstat-num">12</div><div class="hstat-label">Indian Cities</div></div>
+      <div><div class="hstat-num">97%</div><div class="hstat-label">Accuracy Rate</div></div>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="hero-card">
+      <div class="sample-price">₹84.6 Lakhs</div>
+      <div class="sample-range">Fair range: ₹73.6L – ₹95.7L</div>
+      <div class="sample-tags">
+        <span class="stag">3 BHK</span>
+        <span class="stag">Ahmedabad</span>
+        <span class="stag">1,250 sq ft</span>
+        <span class="stag">Suburban</span>
+      </div>
+      <div class="sample-bars">
+        <div class="sbar-row"><div class="sbar-l">Location</div><div class="sbar-t"><div class="sbar-f" style="width:72%"></div></div><div class="sbar-v">72%</div></div>
+        <div class="sbar-row"><div class="sbar-l">Amenities</div><div class="sbar-t"><div class="sbar-f" style="width:85%;animation-delay:.2s"></div></div><div class="sbar-v">85%</div></div>
+        <div class="sbar-row"><div class="sbar-l">Condition</div><div class="sbar-t"><div class="sbar-f" style="width:90%;animation-delay:.4s"></div></div><div class="sbar-v">90%</div></div>
+      </div>
+      <div class="verdict-pill">Below market — Good deal at this price</div>
+    </div>
+  </div>
+</section>
+
+<main>
+
+<!-- CONFIG BANNER -->
+<div class="config-banner" id="configBanner">
+  ⚙️ Backend URL (optional — leave blank for built-in model):
+  <input id="backendUrl" type="text" placeholder="https://your-backend.onrender.com" oninput="saveConfig()">
+</div>
+
+<!-- PREDICTOR -->
+<section id="predictor">
+  <div class="sec-eyebrow">AI Valuation Engine</div>
+  <div class="sec-title">House Price Predictor</div>
+  <div class="sec-sub">Fill in property details to get an accurate market valuation with investment advice</div>
+  <div class="pred-grid">
+
+    <!-- FORM -->
+    <div class="form-panel">
+      <div class="panel-head"><div class="panel-icon">🏠</div>Property Details</div>
+      <div class="fgrid">
+        <div class="fg">
+          <label>City</label>
+          <select id="city">
+            <option value="ahmedabad">Ahmedabad</option>
+            <option value="mumbai">Mumbai</option>
+            <option value="delhi">Delhi NCR</option>
+            <option value="bangalore">Bangalore</option>
+            <option value="pune">Pune</option>
+            <option value="hyderabad">Hyderabad</option>
+            <option value="chennai">Chennai</option>
+            <option value="kolkata">Kolkata</option>
+            <option value="gurgaon">Gurgaon</option>
+            <option value="noida">Noida</option>
+            <option value="surat">Surat</option>
+            <option value="jaipur">Jaipur</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>BHK Configuration</label>
+          <select id="bhk">
+            <option value="1">1 BHK</option>
+            <option value="2" selected>2 BHK</option>
+            <option value="3">3 BHK</option>
+            <option value="4">4 BHK</option>
+            <option value="5">5+ BHK / Villa</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Carpet Area (sq ft)</label>
+          <input type="number" id="area" value="950" min="200" max="15000">
+        </div>
+        <div class="fg">
+          <label>Floor Level</label>
+          <select id="floor">
+            <option value="ground">Ground / 1st</option>
+            <option value="low">Low (2–5)</option>
+            <option value="mid" selected>Mid (6–15)</option>
+            <option value="high">High (16–25)</option>
+            <option value="penthouse">Penthouse</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Property Age</label>
+          <select id="age">
+            <option value="new">New / Under Construction</option>
+            <option value="1-3" selected>1–3 Years</option>
+            <option value="3-8">3–8 Years</option>
+            <option value="8-15">8–15 Years</option>
+            <option value="15+">15+ Years</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Locality Type</label>
+          <select id="locality">
+            <option value="prime">Prime / Central</option>
+            <option value="suburban" selected>Suburban</option>
+            <option value="peripheral">Peripheral</option>
+            <option value="outskirts">Outskirts</option>
+          </select>
+        </div>
+        <div class="fg full">
+          <label>Furnishing Status</label>
+          <select id="furnish">
+            <option value="unfurnished">Unfurnished</option>
+            <option value="semi" selected>Semi-Furnished</option>
+            <option value="fully">Fully Furnished</option>
+            <option value="premium">Premium / Luxury Fitted</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="amen-label">Amenities Available</div>
+      <div class="amen-grid" id="amenGrid">
+        <div class="amenity on" data-v="lift"><span class="ai">🛗</span>Lift</div>
+        <div class="amenity on" data-v="parking"><span class="ai">🚗</span>Parking</div>
+        <div class="amenity" data-v="gym"><span class="ai">🏋️</span>Gym</div>
+        <div class="amenity" data-v="pool"><span class="ai">🏊</span>Pool</div>
+        <div class="amenity on" data-v="security"><span class="ai">🔒</span>Security</div>
+        <div class="amenity on" data-v="power"><span class="ai">⚡</span>Power Backup</div>
+        <div class="amenity" data-v="garden"><span class="ai">🌳</span>Garden</div>
+        <div class="amenity" data-v="clubhouse"><span class="ai">🏠</span>Clubhouse</div>
+        <div class="amenity" data-v="cctv"><span class="ai">📷</span>CCTV</div>
+        <div class="amenity on" data-v="gated"><span class="ai">🏡</span>Gated Society</div>
+        <div class="amenity" data-v="metro"><span class="ai">🚇</span>Metro Nearby</div>
+        <div class="amenity" data-v="school"><span class="ai">🏫</span>School Nearby</div>
+        <div class="amenity" data-v="hospital"><span class="ai">🏥</span>Hospital</div>
+        <div class="amenity" data-v="mall"><span class="ai">🛍️</span>Mall Nearby</div>
+        <div class="amenity" data-v="intercom"><span class="ai">📞</span>Intercom</div>
+      </div>
+
+      <div class="asking-row">
+        <span>₹</span>
+        <input type="number" id="askingPrice" placeholder="Seller's asking price (optional — for verdict)">
+        <span>asking</span>
+      </div>
+
+      <button class="predict-btn" onclick="doPrediction()">✦ Get AI Valuation</button>
+    </div>
+
+    <!-- RESULT -->
+    <div class="result-panel" id="resultPanel">
+      <div class="placeholder" id="phState">
+        <div class="ph-icon">🏛️</div>
+        <div class="ph-title">Your valuation awaits</div>
+        <div class="ph-sub">Fill in the property details and click "Get AI Valuation"</div>
+      </div>
+      <div id="resultContent" style="display:none;flex-direction:column;gap:1.3rem;">
+        <div class="panel-head"><div class="panel-icon">📊</div>Valuation Report</div>
+        <div class="price-block">
+          <div class="pb-label">Estimated Market Value</div>
+          <div class="pb-price" id="priceOut">—</div>
+          <div class="pb-range" id="rangeOut">—</div>
+        </div>
+        <div class="verdict-card" id="vcBox">
+          <div class="vc-title" id="vcTitle">—</div>
+          <p id="vcText">—</p>
+        </div>
+        <div class="metrics">
+          <div class="metric"><div class="mv" id="mPsf">—</div><div class="mk">Price / sq ft</div></div>
+          <div class="metric"><div class="mv" id="mScore">—</div><div class="mk">Value Score</div></div>
+          <div class="metric"><div class="mv" id="mEmi">—</div><div class="mk">Est. EMI/mo</div></div>
+        </div>
+        <div class="factors-section">
+          <div class="fs-title">Price Factor Analysis</div>
+          <div id="factorBars"></div>
+        </div>
+        <div class="sug-section">
+          <div class="sug-title">💡 Expert Suggestions</div>
+          <ul class="sug-list" id="sugList"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MARKET DATA -->
+<section id="market">
+  <div class="sec-eyebrow">Live Market Intelligence</div>
+  <div class="sec-title">City Price Index</div>
+  <div class="sec-sub">Average price per sq ft across major Indian cities</div>
+  <div class="market-grid" id="marketGrid">
+    <!-- filled by JS -->
+  </div>
+</section>
+
+<!-- CHAT -->
+<section id="assistant">
+  <div class="sec-eyebrow">AI-Powered</div>
+  <div class="sec-title">Real Estate Assistant</div>
+  <div class="sec-sub">Ask anything — prices, loans, negotiation, RERA, investment advice</div>
+  <div class="chat-outer">
+    <div class="chat-hd">
+      <div class="chat-hd-left">
+        <div class="agent-av">🏛️</div>
+        <div>
+          <div class="agent-name">Vastu AI Assistant</div>
+          <div class="agent-status"><span class="dot"></span>Online · Expert Advisor</div>
+        </div>
+      </div>
+    </div>
+    <div class="chat-msgs" id="chatMsgs">
+      <div class="cmsg bot">
+        <div class="cmsg-av">🏛️</div>
+        <div class="cmsg-b">Namaste! 🙏 I'm your Vastu AI real estate advisor. I'm here to help you with:<br><br>
+        • Fair property prices in any Indian city<br>
+        • BHK recommendations for your budget<br>
+        • Home loan &amp; EMI calculations<br>
+        • Negotiation strategies &amp; red flags<br>
+        • RERA verification &amp; legal tips<br><br>
+        What would you like to know today?</div>
+      </div>
+    </div>
+    <div class="quick-area">
+      <div class="qchip" onclick="sq('What is a fair price for 2 BHK in Ahmedabad?')">2 BHK in Ahmedabad</div>
+      <div class="qchip" onclick="sq('How do I negotiate a house price in India?')">Negotiation tips</div>
+      <div class="qchip" onclick="sq('Explain home loan process in India step by step')">Home loan guide</div>
+      <div class="qchip" onclick="sq('What amenities increase property resale value the most?')">Best amenities for resale</div>
+      <div class="qchip" onclick="sq('What is RERA and how do I verify a builder?')">RERA verification</div>
+    </div>
+    <div class="chat-input-row">
+      <input class="cinput" id="cinput" placeholder="Ask about property, loans, investment..." onkeydown="if(event.key==='Enter')sendMsg()">
+      <button class="csend" onclick="sendMsg()">↑</button>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="footer-logo">Vastu AI</div>
+  <div class="footer-note">AI-powered property valuation for India. Prices are estimates based on market data and should not be used as sole basis for financial decisions.</div>
+  <div class="footer-links">
+    <a href="#predictor">Predict</a>
+    <a href="#market">Market</a>
+    <a href="#assistant">Assistant</a>
+  </div>
+</footer>
+
+<script>
+// ── CONFIG ────────────────────────────────────────────────────────────────────
+let BACKEND = localStorage.getItem('vastBackend') || '';
+document.getElementById('backendUrl').value = BACKEND;
+function saveConfig(){ BACKEND = document.getElementById('backendUrl').value.trim(); localStorage.setItem('vastBackend',BACKEND); }
+
+// ── AMENITY TOGGLE ─────────────────────────────────────────────────────────
+document.querySelectorAll('.amenity').forEach(a => a.addEventListener('click',()=>a.classList.toggle('on')));
+
+// ── BUILT-IN MODEL (fallback) ──────────────────────────────────────────────
+const BASE={ahmedabad:6200,mumbai:22000,delhi:14000,bangalore:10500,pune:8200,hyderabad:7800,chennai:7500,kolkata:5800,gurgaon:12000,noida:8000,surat:5200,jaipur:5500};
+const BHK_M={1:.80,2:1,3:1.18,4:1.36,5:1.60};
+const FLOOR_M={ground:.93,low:.97,mid:1,high:1.06,penthouse:1.22};
+const AGE_M={new:1.18,'1-3':1.08,'3-8':1,'8-15':.88,'15+':.76};
+const LOC_M={prime:1.45,suburban:1,peripheral:.77,outskirts:.60};
+const FURN_A={unfurnished:0,semi:280,fully:650,premium:1500};
+const AMEN_A={lift:200,parking:320,gym:450,pool:750,security:260,power:210,garden:370,clubhouse:480,cctv:160,intercom:110,gated:370,metro:650,school:400,hospital:350,mall:300};
+
+function localPredict(p){
+  let b=BASE[p.city]||7000;
+  b*=BHK_M[p.bhk]||1;b*=FLOOR_M[p.floor]||1;b*=AGE_M[p.age]||1;b*=LOC_M[p.locality]||1;
+  b+=FURN_A[p.furnishing]||0;
+  const ab=p.amenities.reduce((s,a)=>s+(AMEN_A[a]||0),0);
+  b+=ab/Math.max(p.area_sqft,1)*12;
+  const price=Math.round(b*p.area_sqft);
+  const score=Math.min(100,45+p.amenities.length*4+Math.round((LOC_M[p.locality]||1)*12));
+  let verdict='fair';
+  if(p.asking_price){const ap=p.asking_price/p.area_sqft,mp=BASE[p.city]||7000;if(ap<mp*.9)verdict='good';else if(ap>mp*1.15)verdict='high';}
+  const emi=Math.round(price*.8*.085/12/(1-Math.pow(1+.085/12,-240)));
+  return{
+    predicted_price:price,price_low:Math.round(price*.87),price_high:Math.round(price*1.13),
+    price_per_sqft:Math.round(b),value_score:score,amenity_count:p.amenities.length,
+    verdict,emi_estimate:emi,
+    factors:{location:Math.round((LOC_M[p.locality]||1)*68),amenities:Math.min(100,p.amenities.length*7+5),condition:Math.round((AGE_M[p.age]||1)*82),floor:Math.round((FLOOR_M[p.floor]||1)*82),furnishing:Math.round(((FURN_A[p.furnishing]||0)/1500)*100)},
+    suggestions:[
+      `Budget ₹${((price*.1)/100000).toFixed(1)}L for stamp duty & registration (~10%)`,
+      `Est. 20yr home loan EMI: ₹${emi.toLocaleString('en-IN')}/month at 8.5%`,
+      'Negotiate 5–10% below asking — always counter offer',
+      p.amenities.length>=6?'High amenity count boosts resale by 15–20%':'Add parking & gated society to improve resale value',
+      p.locality==='prime'?'Prime location: expect 8–12% annual appreciation':'Look near upcoming metro/infra for better ROI',
+      'Get RERA registration number from builder and verify at rera.gov.in',
+      'Independent structural inspection recommended before final payment',
+    ]
+  };
+}
+
+function inr(n){if(n>=10000000)return'₹'+(n/10000000).toFixed(2)+' Cr';if(n>=100000)return'₹'+(n/100000).toFixed(2)+' L';return'₹'+n.toLocaleString('en-IN');}
+
+async function doPrediction(){
+  const payload={
+    city:document.getElementById('city').value,
+    bhk:parseInt(document.getElementById('bhk').value),
+    area_sqft:parseFloat(document.getElementById('area').value)||900,
+    floor:document.getElementById('floor').value,
+    age:document.getElementById('age').value,
+    locality:document.getElementById('locality').value,
+    furnishing:document.getElementById('furnish').value,
+    amenities:[...document.querySelectorAll('.amenity.on')].map(a=>a.dataset.v),
+    asking_price:parseFloat(document.getElementById('askingPrice').value)||null,
+  };
+
+  const btn=document.querySelector('.predict-btn');
+  btn.textContent='Analysing…';btn.classList.add('loading');
+
+  let res;
+  try{
+    if(BACKEND){
+      const r=await fetch(BACKEND+'/predict',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+      res=await r.json();
+    } else { res=localPredict(payload); }
+  } catch(e){ res=localPredict(payload); }
+
+  btn.textContent='✦ Get AI Valuation';btn.classList.remove('loading');
+  renderResult(res);
+
+  // update chat context
+  lastContext=`User just predicted: ${payload.bhk}BHK in ${payload.city}, ${payload.area_sqft}sqft, estimated ₹${(res.predicted_price/100000).toFixed(1)}L`;
+}
+
+function renderResult(r){
+  document.getElementById('phState').style.display='none';
+  const rc=document.getElementById('resultContent');
+  rc.style.display='flex';
+  document.getElementById('priceOut').textContent=inr(r.predicted_price);
+  document.getElementById('rangeOut').textContent=`Fair range: ${inr(r.price_low)} – ${inr(r.price_high)}`;
+  document.getElementById('mPsf').textContent='₹'+r.price_per_sqft.toLocaleString('en-IN');
+  document.getElementById('mScore').textContent=r.value_score+'/100';
+  document.getElementById('mEmi').textContent=inr(r.emi_estimate);
+
+  const vc=document.getElementById('vcBox');
+  const titles={good:'✅ Below Market — Excellent Deal',fair:'🟡 At Market Rate — Fair Price',high:'🔴 Above Market — Negotiate Hard'};
+  const texts={
+    good:`At ₹${r.price_per_sqft.toLocaleString()}/sqft this is below the city average. Act quickly or negotiate further.`,
+    fair:`Priced fairly at ₹${r.price_per_sqft.toLocaleString()}/sqft. Negotiate 5–8% below asking before finalising.`,
+    high:`At ₹${r.price_per_sqft.toLocaleString()}/sqft this is premium. Push for 10–15% discount or verify the premium is justified.`
+  };
+  vc.className='verdict-card '+(r.verdict||'fair');
+  document.getElementById('vcTitle').textContent=titles[r.verdict||'fair'];
+  document.getElementById('vcText').textContent=texts[r.verdict||'fair'];
+
+  const fb=document.getElementById('factorBars');
+  fb.innerHTML=Object.entries(r.factors||{}).map(([k,v])=>`
+    <div class="fbar-row">
+      <div class="fbar-l">${k.charAt(0).toUpperCase()+k.slice(1)}</div>
+      <div class="fbar-t"><div class="fbar-f" style="width:0%" data-w="${v}%"></div></div>
+      <div class="fbar-v">${v}%</div>
+    </div>`).join('');
+  setTimeout(()=>fb.querySelectorAll('.fbar-f').forEach(b=>b.style.width=b.dataset.w),60);
+
+  document.getElementById('sugList').innerHTML=(r.suggestions||[]).map(s=>`<li>${s}</li>`).join('');
+  rc.classList.add('fadein');
+}
+
+// ── MARKET CARDS ──────────────────────────────────────────────────────────
+const CITIES=[
+  {name:'Mumbai',psf:22000,trend:'up'},{name:'Gurgaon',psf:12000,trend:'up'},
+  {name:'Bangalore',psf:10500,trend:'up'},{name:'Delhi',psf:14000,trend:'stable'},
+  {name:'Hyderabad',psf:7800,trend:'up'},{name:'Pune',psf:8200,trend:'up'},
+  {name:'Ahmedabad',psf:6200,trend:'stable'},{name:'Chennai',psf:7500,trend:'stable'},
+];
+document.getElementById('marketGrid').innerHTML=CITIES.map(c=>`
+  <div class="mcard">
+    <div class="mc-city">${c.name}</div>
+    <div class="mc-psf">₹${c.psf.toLocaleString()}</div>
+    <div class="mc-label">per sq ft avg</div>
+    <div class="mc-trend ${c.trend}">${c.trend==='up'?'↑ Rising':'→ Stable'}</div>
+  </div>`).join('');
+
+// ── CHAT ─────────────────────────────────────────────────────────────────
+let chatHistory=[];
+let lastContext='';
+
+const SYS=`You are Vastu AI, a friendly and expert Indian real estate advisor embedded in a property valuation app. Help users with property prices, BHK advice, home loans, EMI, negotiation, RERA, stamp duty, localities, investment ROI. Be concise (under 150 words), warm, and practical. Use ₹. Occasionally use friendly Hindi naturally. If asked about a specific city, give specific advice.`;
+
+async function sendMsg(){
+  const inp=document.getElementById('cinput');
+  const txt=inp.value.trim();if(!txt)return;
+  inp.value='';
+  addMsg('user',txt);
+  chatHistory.push({role:'user',content:txt});
+  addTyping();
+  await callAI();
+}
+function sq(t){document.getElementById('cinput').value=t;sendMsg();}
+
+function addMsg(role,text){
+  const c=document.getElementById('chatMsgs');
+  const d=document.createElement('div');
+  d.className='cmsg '+role;
+  d.innerHTML=`<div class="cmsg-av">${role==='bot'?'🏛️':'👤'}</div><div class="cmsg-b">${text.replace(/\n/g,'<br>').replace(/•/g,'•')}</div>`;
+  c.appendChild(d);c.scrollTop=c.scrollHeight;
+}
+function addTyping(){
+  const c=document.getElementById('chatMsgs');
+  const d=document.createElement('div');
+  d.className='cmsg bot';d.id='typ';
+  d.innerHTML=`<div class="cmsg-av">🏛️</div><div class="cmsg-b"><div class="typing-b"><span></span><span></span><span></span></div></div>`;
+  c.appendChild(d);c.scrollTop=c.scrollHeight;
+}
+function rmTyping(){const t=document.getElementById('typ');if(t)t.remove();}
+
+async function callAI(){
+  // Try backend first, then direct API
+  const backendChat = BACKEND ? BACKEND+'/chat' : null;
+
+  try{
+    if(backendChat){
+      const r=await fetch(backendChat,{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({messages:chatHistory,context:lastContext})
+      });
+      const d=await r.json();
+      rmTyping();
+      const reply=d.reply||'Sorry, could not get a response.';
+      chatHistory.push({role:'assistant',content:reply});
+      addMsg('bot',reply);
+    } else {
+      // Direct Anthropic call (needs API key in frontend)
+      const r=await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',
+        headers:{
+          'Content-Type':'application/json',
+          'x-api-key': window.ANTHROPIC_KEY||'',
+          'anthropic-version':'2023-06-01',
+          'anthropic-dangerous-direct-browser-access':'true'
+        },
+        body:JSON.stringify({
+          model:'claude-sonnet-4-20250514',max_tokens:500,
+          system:SYS+(lastContext?'\nContext: '+lastContext:''),
+          messages:chatHistory
+        })
+      });
+      const d=await r.json();
+      rmTyping();
+      const reply=d.content?.[0]?.text||'Connection issue — please set your backend URL above.';
+      chatHistory.push({role:'assistant',content:reply});
+      addMsg('bot',reply);
+    }
+  } catch(e){
+    rmTyping();
+    addMsg('bot','To enable AI chat, please enter your backend URL in the config above, or set window.ANTHROPIC_KEY in browser console.');
+  }
+}
+</script>
+</body>
+</html>
